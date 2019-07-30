@@ -48,7 +48,7 @@ fun readPOM(xmlFile: Path): Project? {
     return try {
         unmarshalPOM(lines.joinToString(System.lineSeparator()))
     } catch (ex: UnmarshalException) {
-        ex.printStackTrace()
+        System.err.println(ex.localizedMessage)
         null
     }
 }
