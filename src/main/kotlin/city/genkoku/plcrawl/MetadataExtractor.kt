@@ -8,12 +8,18 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.list
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.ZonedDateTime
 import kotlin.streams.asSequence
 
+
+@Serializable
+data class FinalStatus(
+    val timestamp: String,
+    val results: List<ExtractionResult>
+)
 
 @Serializable
 data class ExtractionResult(
@@ -33,7 +39,17 @@ fun main(args: Array<String>) {
 
     Files.list(dir).asSequence()
         .filter { it.last().toString().endsWith(".jar") }
-        .map { FileSystems.newFileSystem(it, null) }
+        .filter { Files.size(it) > 0 }
+        .map { file ->
+            runCatching {
+                FileSystems.newFileSystem(file, null)
+            }.recover {
+                System.err.println("Corrupted archive is detected: '$file'")
+                it.printStackTrace()
+                null
+            }.getOrThrow()
+        }
+        .filterNotNull()
         .flatMap { it.rootDirectories.asSequence() }
         .map { root ->
             readPluginData(root)?.let {
@@ -42,8 +58,9 @@ fun main(args: Array<String>) {
         }
         .filterNotNull()
         .toList()
+        .let { FinalStatus(ZonedDateTime.now().toString(), it) }
         .let {
-            println(json.stringify(ExtractionResult.serializer().list, it))
+            println(json.stringify(FinalStatus.serializer(), it))
         }
 }
 
