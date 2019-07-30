@@ -83,10 +83,6 @@ private class DependencyBuilder : POMBuilder<Dependency> {
     @get:XmlElement(name = "classifier")
     var classifier: String? = null
 
-    override fun toString(): String {
-        return "$scope \"$groupId:$artifactId:$version:$classifier\""
-    }
-
     override fun build(): Dependency {
         return Dependency(
             groupId ?: "",
@@ -126,16 +122,16 @@ private class ParentBuilder : POMBuilder<Parent> {
 
 private class LicenseBuilder : POMBuilder<License> {
 
-    @XmlElement
+    @get:XmlElement
     var name: String? = null
 
-    @XmlElement
+    @get:XmlElement
     var url: String? = null
 
-    @XmlElement
+    @get:XmlElement
     var distribution: String? = null
 
-    @XmlElement
+    @get:XmlElement
     var comments: String? = null
 
     override fun build(): License {
@@ -171,9 +167,9 @@ private class ProjectBuilder : POMBuilder<Project> {
     @get:XmlElement(name = "dependency")
     var dependencies: List<DependencyBuilder>? = null
 
-    override fun toString(): String {
-        return "$groupId:$artifactId:$version[properties=$properties, dependencies=$dependencies]"
-    }
+    @get:XmlElementWrapper(name = "licenses")
+    @get:XmlElement(name = "license")
+    var licenses: List<LicenseBuilder>? = null
 
     override fun build(): Project {
         return Project(
@@ -182,6 +178,7 @@ private class ProjectBuilder : POMBuilder<Project> {
             version ?: "",
             properties ?: mapOf(),
             dependencies?.map { it.build() } ?: listOf(),
+            licenses?.map { it.build() } ?: listOf(),
             parent?.build()
         )
     }

@@ -35,5 +35,6 @@ data class Project(
     val version: String = "",
     val properties: Map<String, String> = mapOf(),
     val dependencies: List<Dependency> = listOf(),
+    val licenses: List<License> = listOf(),
     val parent: Parent? = null
 )
