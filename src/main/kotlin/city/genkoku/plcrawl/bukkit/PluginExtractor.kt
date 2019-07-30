@@ -22,13 +22,29 @@ fun readPluginData(root: Path): Description? {
         return null
 
     val map = Yaml().loadAs(Files.newInputStream(descriptionFile), Map::class.java)
+
+    val name = map["name"]
+    val version = map["version"]
+    val main = map["main"]
+    val website = map["website"]
+    val author = map["author"]
+    val authors = map["authors"]
+
+    author?.let {
+        if (it !is String) {
+            System.err.println(
+                "Warning: '$name' has invalid plugin.yml (property 'author' is ${it.javaClass})"
+            )
+        }
+    }
+
     return Description(
-        map["name"] as String,
-        map["version"] as String,
-        map["main"] as String,
-        map["website"] as String?,
-        map["author"] as String?,
-        map["authors"] as List<String>?
+        name as String,
+        version.toString(),
+        main as String,
+        website as String?,
+        author?.toString(),
+        authors as List<String>?
     )
 }
 
