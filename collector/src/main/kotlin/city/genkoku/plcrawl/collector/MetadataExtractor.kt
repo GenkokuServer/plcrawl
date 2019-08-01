@@ -1,8 +1,8 @@
-package city.genkoku.plcrawl
+package city.genkoku.plcrawl.collector
 
-import city.genkoku.plcrawl.bukkit.Description
-import city.genkoku.plcrawl.bukkit.readPluginData
-import city.genkoku.plcrawl.maven.readArchivedPOMs
+import city.genkoku.plcrawl.collector.bukkit.Description
+import city.genkoku.plcrawl.collector.bukkit.readPluginData
+import city.genkoku.plcrawl.collector.maven.readArchivedPOMs
 import com.alibaba.fastjson.JSON
 import org.apache.maven.model.Model
 import java.nio.file.FileSystems
@@ -48,7 +48,10 @@ fun main(args: Array<String>) {
         .parallel()
         .map { root ->
             readPluginData(root)?.let {
-                ExtractionResult(it, readArchivedPOMs(root))
+                ExtractionResult(
+                    it,
+                    readArchivedPOMs(root)
+                )
             }
         }
         .asSequence()

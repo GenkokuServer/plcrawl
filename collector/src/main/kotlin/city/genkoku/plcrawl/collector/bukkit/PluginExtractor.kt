@@ -1,4 +1,4 @@
-package city.genkoku.plcrawl.bukkit
+package city.genkoku.plcrawl.collector.bukkit
 
 
 import org.yaml.snakeyaml.Yaml
