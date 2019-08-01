@@ -45,4 +45,3 @@ fun readPluginData(root: Path): Description? {
         authors as List<String>?
     )
 }
-
