@@ -1,12 +1,10 @@
 package city.genkoku.plcrawl.bukkit
 
 
-import kotlinx.serialization.Serializable
 import org.yaml.snakeyaml.Yaml
 import java.nio.file.Files
 import java.nio.file.Path
 
-@Serializable
 data class Description(
     val name: String,
     val version: String,
