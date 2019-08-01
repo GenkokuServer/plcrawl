@@ -4,12 +4,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>city.genkoku.plcrawl</groupId>
-    <artifactId>plcrawl</artifactId>
+    <groupId>city.genkoku.plcrawl.collector</groupId>
+    <artifactId>plcrawl-collector</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>plcrawl</name>
+    <name>plcrawl-collector</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
