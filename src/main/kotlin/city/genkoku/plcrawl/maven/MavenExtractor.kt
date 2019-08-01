@@ -36,7 +36,23 @@ fun readArchivedPOMs(root: Path): List<Model> {
         .filter { Files.isRegularFile(it) }
         .map(::readPOM)
         .filterNotNull()
+        .filter(::filterPOM)
         .toList()
+}
+
+val KNOWN_BUKKIT_DEPENDENCIES = arrayOf(
+    "org.bukkit:bukkit:jar",
+    "org.bukkit:craftbukkit:jar",
+    "org.spigotmc:spigot-api:jar",
+    "org.spigotmc:spigot:jar",
+    "com.destroystokyo.paper:paper-api:jar"
+)
+
+fun filterPOM(pom: Model): Boolean {
+    return pom.dependencies
+        .asSequence()
+        .filter { KNOWN_BUKKIT_DEPENDENCIES.contains(it.managementKey) }
+        .count() > 0
 }
 
 fun readPOM(xmlFile: Path): Model? {
