@@ -37,10 +37,9 @@ fun main(args: Array<String>) {
         .map { file ->
             runCatching {
                 FileSystems.newFileSystem(file, null)
-            }.recover {
+            }.onFailure {
                 System.err.println("Corrupted archive is detected: '$file'")
                 it.printStackTrace()
-                null
             }.getOrThrow()
         }
         .filterNotNull()
