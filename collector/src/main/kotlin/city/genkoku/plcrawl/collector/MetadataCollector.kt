@@ -15,10 +15,10 @@ import kotlin.streams.asStream
 
 data class FinalStatus(
     val timestamp: String,
-    val results: List<ExtractionResult>
+    val results: List<CollectionResult>
 )
 
-data class ExtractionResult(
+data class CollectionResult(
     val description: Description,
     val poms: List<Model>
 )
@@ -48,7 +48,7 @@ fun main(args: Array<String>) {
         .parallel()
         .map { root ->
             readPluginData(root)?.let {
-                ExtractionResult(
+                CollectionResult(
                     it,
                     readArchivedPOMs(root)
                 )

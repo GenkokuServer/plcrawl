@@ -119,7 +119,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>city.genkoku.plcrawl.collector.MetadataExtractorKt</mainClass>
+                                    <mainClass>city.genkoku.plcrawl.collector.MetadataCollectorKt</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
