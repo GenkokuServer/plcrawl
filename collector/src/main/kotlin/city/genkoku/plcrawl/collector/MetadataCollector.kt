@@ -10,7 +10,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.ZonedDateTime
 import kotlin.streams.asSequence
-import kotlin.streams.asStream
 
 
 data class FinalStatus(
@@ -20,7 +19,8 @@ data class FinalStatus(
 
 data class CollectionResult(
     val description: Description,
-    val poms: List<Model>
+    val poms: List<Model>,
+    val jar: String
 )
 
 
@@ -34,27 +34,24 @@ fun main(args: Array<String>) {
     Files.list(dir).asSequence()
         .filter { it.last().toString().endsWith(".jar") }
         .filter { Files.size(it) > 0 }
-        .map { file ->
+        .flatMap { file ->
             runCatching {
-                FileSystems.newFileSystem(file, null)
+                val fs = FileSystems.newFileSystem(file, null)
+                System.err.println("Reading $file...")
+                fs.rootDirectories.asSequence().map { root ->
+                    readPluginData(root)?.let {
+                        CollectionResult(
+                            it,
+                            readArchivedPOMs(root),
+                            file.fileName.toString()
+                        )
+                    }
+                }
             }.onFailure {
                 System.err.println("Corrupted archive is detected: '$file'")
                 it.printStackTrace()
             }.getOrThrow()
         }
-        .filterNotNull()
-        .flatMap { it.rootDirectories.asSequence() }
-        .asStream()
-        .parallel()
-        .map { root ->
-            readPluginData(root)?.let {
-                CollectionResult(
-                    it,
-                    readArchivedPOMs(root)
-                )
-            }
-        }
-        .asSequence()
         .filterNotNull()
         .toList()
         .let { FinalStatus(ZonedDateTime.now().toString(), it) }
