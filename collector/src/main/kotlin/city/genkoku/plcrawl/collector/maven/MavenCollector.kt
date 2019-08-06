@@ -37,6 +37,7 @@ fun readArchivedPOMs(root: Path): List<Model> {
         .map(::readPOM)
         .filterNotNull()
         .filter(::filterPOM)
+        .map(::inheritPOM)
         .toList()
 }
 
@@ -53,6 +54,12 @@ fun filterPOM(pom: Model): Boolean {
         .asSequence()
         .filter { KNOWN_BUKKIT_DEPENDENCIES.contains(it.managementKey) }
         .count() > 0
+}
+
+fun inheritPOM(pom: Model): Model {
+    pom.groupId = pom.groupId ?: pom.parent.groupId
+    pom.version = pom.version ?: pom.parent.version
+    return pom
 }
 
 fun readPOM(xmlFile: Path): Model? {
