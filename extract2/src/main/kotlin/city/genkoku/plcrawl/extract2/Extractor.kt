@@ -7,73 +7,6 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
 
-
-fun Any?.renderNullable(header: String): String? {
-    return this?.let {
-        val str = it.toString()
-        "$header: ${
-        if (str.contains("://"))
-            str
-        else
-            "`$str`"
-        }"
-
-    }
-}
-
-fun List<*>?.renderList(header: String): String? {
-    return this?.let {
-        if (it.isEmpty()) return null
-        return (sequenceOf("$header:")
-                + it.asSequence().map { e -> "  - $e" })
-            .joinToString("\n") + "\n"
-    }
-}
-
-fun String.render(element: Any?): String? {
-    return when (element) {
-        is List<*>? -> element.renderList(this)
-        else -> element.renderNullable(this)
-    }
-}
-
-data class ExtractedData(
-    val name: String,
-    val version: String,
-    val jar: String,
-    val website: String?,
-    val loadbefore: List<String>?,
-    val depend: List<String>?,
-    val softdepend: List<String>?,
-    val projectId: String?,
-    val bukkitVersion: String?,
-    val scm: String?,
-    val authors: List<String>?,
-    val licenses: List<String>?
-) {
-    fun render(): String {
-        return sequenceOf(
-            "# $name",
-            "名前: $name",
-            "バージョン: $version",
-            "JAR".render(jar),
-            "Web サイト".render(website),
-            "このプラグインを前提とするプラグイン".render(loadbefore),
-            "依存関係".render(depend),
-            "連携可能なプラグイン".render(softdepend),
-            "",
-            "プロジェクト ID".render(projectId),
-            "コンパイル時の Bukkit バージョン".render(bukkitVersion),
-            "リポジトリ".render(scm),
-            "著作者".render(authors),
-            "ライセンス".render(licenses),
-            ""
-        )
-            .filterNotNull()
-            .joinToString("  \n")
-    }
-}
-
 fun extractLicenses(pom: JsonElement?): List<String>? {
     return pom?.let {
         it["licenses"].jsonArray.map { license ->
@@ -137,10 +70,11 @@ fun main() {
         val source = generateSequence { readLine() }.joinToString("\n")
         source.parse<FinalStatus>()
             .results
+            .asSequence()
             .map {
                 val desc = it.description
                 val pom = it.poms.firstOrNull()
-                ExtractedData(
+                Page(
                     desc.name,
                     desc.version,
                     it.jar,
@@ -155,8 +89,9 @@ fun main() {
                     extractLicenses(pom)
                 )
             }
+            .merge()
             .map {
-                Pair(it.jar, it.render())
+                Pair(it.first, it.second)
             }
             .forEach {
                 var file = fs.getPath("/", "${it.first}.md")
