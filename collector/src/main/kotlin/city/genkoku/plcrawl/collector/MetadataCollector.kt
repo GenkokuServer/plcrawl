@@ -14,6 +14,7 @@ import kotlin.streams.asSequence
 
 data class FinalStatus(
     val timestamp: String,
+    val tag: String,
     val results: List<CollectionResult>
 )
 
@@ -54,7 +55,7 @@ fun main(args: Array<String>) {
         }
         .filterNotNull()
         .toList()
-        .let { FinalStatus(ZonedDateTime.now().toString(), it) }
+        .let { FinalStatus(ZonedDateTime.now().toString(), dir.fileName.toString(), it) }
         .let {
             println(JSON.toJSONString(it))
         }

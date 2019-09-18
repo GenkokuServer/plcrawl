@@ -68,39 +68,54 @@ fun main() {
     val uri = URI.create("jar:" + results.toUri())
     FileSystems.newFileSystem(uri, mapOf(Pair("create", "true"))).use { fs ->
         val source = generateSequence { readLine() }.joinToString("\n")
-        source.parse<FinalStatus>()
-            .results
+        val array = source.toJsonArray()
+
+        array
+            .filter {
+                !it.jsonObject.contains("tag")
+            }
+            .forEach { print(it) }
+
+        array.map { it.parse<FinalStatus>() }
             .asSequence()
-            .map {
-                val desc = it.description
-                val pom = it.poms.firstOrNull()
-                Page(
-                    desc.name,
-                    desc.version,
-                    it.jar,
-                    desc.website,
-                    desc.loadbefore,
-                    desc.depend,
-                    desc.softdepend,
-                    identify(pom),
-                    determineBukkitVersion(pom),
-                    scm(pom),
-                    (desc.authors.asSequence().let { s -> desc.author?.let { s + it } ?: s }).distinct().toList(),
-                    extractLicenses(pom)
-                )
+            .flatMap { status ->
+                status
+                    .results
+                    .asSequence()
+                    .map {
+                        val desc = it.description
+                        val pom = it.poms.firstOrNull()
+                        Page(
+                            desc.name,
+                            desc.version,
+                            it.jar,
+                            status.tag,
+                            desc.website,
+                            desc.loadbefore,
+                            desc.depend,
+                            desc.softdepend,
+                            identify(pom),
+                            determineBukkitVersion(pom),
+                            scm(pom),
+                            (desc.authors.asSequence().let { s ->
+                                desc.author?.let { s + it } ?: s
+                            }).distinct().toList(),
+                            extractLicenses(pom)
+                        )
+                    }
             }
             .merge()
-            .map {
-                Pair(it.first, it.second)
-            }
             .forEach {
-                var file = fs.getPath("/", "${it.first}.md")
-                var i = 0
-                while (Files.exists(file)) {
-                    file = fs.getPath("/", "${it.first}${i++}.md")
+                var file = fs.getPath("/", "${it.name}.md")
+                if (Files.exists(file)) {
+                    var i = 0
+                    while (Files.exists(file)) {
+                        file = fs.getPath("/", "${it.name}${i++}.md")
+                    }
                 }
                 println("Writing to ${file.fileName}...")
-                Files.write(file, it.second.split('\n'));
+                Files.write(file, it.render().split('\n'))
+                Files.write(file.resolveSibling(file.fileName.toString() + ".tags"), it.tags)
             }
     }
 
@@ -108,6 +123,7 @@ fun main() {
 
 data class FinalStatus(override val json: JsonObject) : JsonModel {
     val timestamp by string
+    val tag by string
     val results by modelList<CollectionResult>()
 }
 
