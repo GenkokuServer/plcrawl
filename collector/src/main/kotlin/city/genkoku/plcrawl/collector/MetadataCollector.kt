@@ -50,7 +50,7 @@ fun main(args: Array<String>) {
             }.onFailure {
                 System.err.println("Corrupted archive is detected: '$file'")
                 it.printStackTrace()
-            }.getOrThrow()
+            }.getOrElse { sequenceOf() }
         }
         .filterNotNull()
         .toList()
@@ -59,3 +59,4 @@ fun main(args: Array<String>) {
             println(JSON.toJSONString(it))
         }
 }
+

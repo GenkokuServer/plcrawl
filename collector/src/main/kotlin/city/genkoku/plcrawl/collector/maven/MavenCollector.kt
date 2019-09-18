@@ -35,10 +35,15 @@ fun readArchivedPOMs(root: Path): List<Model> {
         .asSequence()
         .filter { Files.isRegularFile(it) }
         .map(::readPOM)
+        .filterAll()
+        .toList()
+}
+
+fun Sequence<Model?>.filterAll(): Sequence<Model> {
+    return this
         .filterNotNull()
         .filter(::filterPOM)
         .map(::inheritPOM)
-        .toList()
 }
 
 val KNOWN_BUKKIT_DEPENDENCIES = arrayOf(
@@ -75,7 +80,24 @@ fun readPOM(xmlFile: Path): Model? {
 }
 
 fun unmarshalPOM(xml: String): Model? {
-    return xml.reader().use {
+    val properties = xml.reader().use {
+        MavenXpp3Reader().read(it).properties
+    }
+
+    var xmlMutable = xml
+    for (key in properties.keys) {
+        val value = (key as String).resolve(properties as Map<String, String>);
+        System.err.println("Processing property $key: $value")
+
+        value?.also {
+            xmlMutable = xmlMutable.replace(
+                "\${${key as String}}",
+                it
+            )
+        }
+    }
+
+    return xmlMutable.reader().use {
         MavenXpp3Reader().read(it)
     }
 }
