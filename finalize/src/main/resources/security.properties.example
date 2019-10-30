@@ -1,0 +1,8 @@
+finalizer.installation_id=
+finalizer.issuer=
+finalizer.user=GenkokuServer
+finalizer.repository=
+finalizer.issue.label.color=orange
+finalizer.issue.label.special_name=ゲンコくん (Oh So Orange)
+finalizer.authentication.key=botkey.p8
+finalizer.authentication.permitted_repositories=
